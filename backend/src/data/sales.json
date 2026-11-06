@@ -1,0 +1,121 @@
+[
+  {
+    "id": "sale-1793936922522",
+    "fecha": "2026-11-06T03:48:42.522Z",
+    "cajeroId": "usr-cajero-01",
+    "cajeroNombre": "Cajero Uno",
+    "cajeroRol": "cajero_1",
+    "items": [
+      {
+        "id": "prod-001",
+        "nombre": "Coca Cola 500ml",
+        "precio": 6,
+        "costo": 3.6,
+        "cantidad": 1,
+        "subtotal": 6,
+        "ganancia": 2.4
+      }
+    ],
+    "totalVenta": 6,
+    "totalCosto": 3.6,
+    "totalGanancia": 2.4,
+    "metodoPago": "Efectivo",
+    "cliente": "Prueba Cajero 1"
+  },
+  {
+    "id": "sale-1001",
+    "fecha": "2026-11-04T15:30:00.000Z",
+    "cajeroId": "usr-cajero-01",
+    "cajeroNombre": "Cajero Uno",
+    "cajeroRol": "cajero_1",
+    "items": [
+      {
+        "id": "prod-001",
+        "nombre": "Coca Cola 500ml",
+        "precio": 6,
+        "costo": 3.5,
+        "cantidad": 2,
+        "subtotal": 12,
+        "ganancia": 5
+      },
+      {
+        "id": "prod-003",
+        "nombre": "Papas Fritas Clásicas 110g",
+        "precio": 3,
+        "costo": 1.6,
+        "cantidad": 1,
+        "subtotal": 3,
+        "ganancia": 1.4
+      }
+    ],
+    "totalVenta": 15,
+    "totalCosto": 8.6,
+    "totalGanancia": 6.4,
+    "metodoPago": "Efectivo",
+    "cliente": "Cliente de paso"
+  },
+  {
+    "id": "sale-1002",
+    "fecha": "2026-11-04T18:45:00.000Z",
+    "cajeroId": "usr-cajero-02",
+    "cajeroNombre": "Cajero Dos",
+    "cajeroRol": "cajero_2",
+    "items": [
+      {
+        "id": "prod-012",
+        "nombre": "Four Loko",
+        "precio": 20,
+        "costo": 13,
+        "cantidad": 1,
+        "subtotal": 20,
+        "ganancia": 7
+      },
+      {
+        "id": "prod-004",
+        "nombre": "Doritos Mega Queso 90g",
+        "precio": 3,
+        "costo": 1.7,
+        "cantidad": 2,
+        "subtotal": 6,
+        "ganancia": 2.6
+      }
+    ],
+    "totalVenta": 26,
+    "totalCosto": 16.4,
+    "totalGanancia": 9.6,
+    "metodoPago": "Transferencia / QR",
+    "cliente": "Marcos G."
+  },
+  {
+    "id": "sale-1003",
+    "fecha": "2026-11-05T11:10:00.000Z",
+    "cajeroId": "usr-cajero-01",
+    "cajeroNombre": "Cajero Uno",
+    "cajeroRol": "cajero_1",
+    "items": [
+      {
+        "id": "prod-009",
+        "nombre": "Chocolate",
+        "precio": 20,
+        "costo": 12,
+        "cantidad": 1,
+        "subtotal": 20,
+        "ganancia": 8
+      },
+      {
+        "id": "prod-002",
+        "nombre": "Agua Mineral Sin Gas 600ml",
+        "precio": 6,
+        "costo": 3,
+        "cantidad": 2,
+        "subtotal": 12,
+        "ganancia": 6
+      }
+    ],
+    "totalVenta": 32,
+    "totalCosto": 18,
+    "totalGanancia": 14,
+    "metodoPago": "Efectivo",
+    "cliente": "Lucía P."
+  }
+]

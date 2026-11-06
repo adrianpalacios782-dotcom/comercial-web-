@@ -6,4 +6,12 @@
   body {
     @apply min-h-screen bg-slate-50 font-sans text-slate-800;
   }
+  html {
+    front-size: 100%;
+  }
+  @media (min-width: 1536px){
+    html{
+      front-size: 110%;
+    }
+  }
 }

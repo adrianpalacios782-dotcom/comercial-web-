@@ -1,0 +1,26 @@
+[
+  {
+    "id": "usr-admin-01",
+    "username": "admin",
+    "nombre": "Administrador Principal",
+    "rol": "admin",
+    "passwordHash": "$2a$10$wT55yU44h9yV7s2s6FzZveP6wVp69i7gq0T9jJ5G2kK8Z.r9B2/4a",
+    "passwordHint": "Admin2026!"
+  },
+  {
+    "id": "usr-cajero-01",
+    "username": "cajero1",
+    "nombre": "Cajero Uno",
+    "rol": "cajero_1",
+    "passwordHash": "$2a$10$tZ3F3JqY2w0FzZveP6wVp69i7gq0T9jJ5G2kK8Z.r9B2/4aW2j7u",
+    "passwordHint": "Cajero1@2026"
+  },
+  {
+    "id": "usr-cajero-02",
+    "username": "cajero2",
+    "nombre": "Cajero Dos",
+    "rol": "cajero_2",
+    "passwordHash": "$2a$10$eE2K2PjV1q9FzZveP6wVp69i7gq0T9jJ5G2kK8Z.r9B2/4aL1i6t",
+    "passwordHint": "Cajero2@2026"
+  }
+]

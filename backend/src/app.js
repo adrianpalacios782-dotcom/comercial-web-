@@ -5,6 +5,7 @@ import { ENV } from './config/env.js';
 import { apiLimiter } from './middlewares/rateLimiter.js';
 import productRoutes from './routes/productRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import salesRoutes from './routes/salesRoutes.js';
 
 const app = express();
 
@@ -12,14 +13,13 @@ const app = express();
 // 1. MIDDLEWARES DE SEGURIDAD ESENCIALES
 // ==========================================
 
-// Helmet añade y ajusta cabeceras HTTP para mitigar ataques comunes (XSS, Clickjacking, etc.)
+// Helmet añade y ajusta cabeceras HTTP para mitigar ataques comunes
 app.use(helmet());
 
 // CORS: Permite únicamente peticiones desde el origen del Frontend configurado
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Permitir peticiones sin origen (como Postman o curl) o que coincidan con FRONTEND_URL
       if (!origin || origin === ENV.FRONTEND_URL || origin.startsWith('http://localhost:')) {
         callback(null, true);
       } else {
@@ -32,8 +32,8 @@ app.use(
   })
 );
 
-// Limitar el tamaño del body para evitar ataques de Denegación de Servicio (DoS)
-app.use(express.json({ limit: '10kb' }));
+// Limitar el tamaño del body
+app.use(express.json({ limit: '100kb' }));
 
 // Limitador de peticiones para toda la API
 app.use('/api', apiLimiter);
@@ -54,6 +54,7 @@ app.get('/api/health', (req, res) => {
 // Rutas de la API
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/sales', salesRoutes);
 
 // Manejo de rutas inexistentes (404)
 app.use((req, res) => {
@@ -71,7 +72,6 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Error interno del servidor.',
-    // En desarrollo mostramos más detalles, en producción ocultamos la traza sensible
     ...(ENV.NODE_ENV === 'development' && { stack: err.stack })
   });
 });

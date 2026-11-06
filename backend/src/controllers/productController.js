@@ -115,6 +115,7 @@ export const createProduct = (req, res) => {
       nombre: String(nombre).trim(),
       descripcion: descripcion ? String(descripcion).trim() : '',
       precio: Number(precio),
+      costo: req.body.costo !== undefined ? Number(req.body.costo) : Number((Number(precio) * 0.6).toFixed(2)),
       stock: Number(stock),
       categoria: String(categoria).trim(),
       url_imagen: url_imagen || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&auto=format&fit=crop&q=80',

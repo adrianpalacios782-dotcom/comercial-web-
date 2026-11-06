@@ -9,9 +9,13 @@ import {
   ArrowRight,
   MapPin,
   User,
-  FileText
+  FileText,
+  CreditCard,
+  CheckCircle2,
 } from 'lucide-react';
 import { useCart, STORE_PHONE_NUMBER } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import { recordSale } from '../services/api';
 
 export const CartDrawer = () => {
   const {
@@ -26,12 +30,17 @@ export const CartDrawer = () => {
     generateWhatsAppUrl,
   } = useCart();
 
-  // Formulario con datos de entrega para personalizar el mensaje de WhatsApp
+  const { token, user } = useAuth();
+
   const [customerData, setCustomerData] = useState({
     nombre: '',
     direccion: '',
     notas: '',
   });
+
+  const [paymentMethod, setPaymentMethod] = useState('Efectivo');
+  const [isProcessingSale, setIsProcessingSale] = useState(false);
+  const [saleSuccessMessage, setSaleSuccessMessage] = useState('');
 
   if (!isCartOpen) return null;
 
@@ -40,19 +49,64 @@ export const CartDrawer = () => {
     setCustomerData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSendWhatsApp = () => {
+  const formatPrice = (amount) => {
+    return new Intl.NumberFormat('es-BO', {
+      style: 'currency',
+      currency: 'BOB',
+      minimumFractionDigits: 2,
+    }).format(amount);
+  };
+
+  // Registrar venta directa en tienda física (Cajero o Admin)
+  const handleProcessLocalSale = async () => {
+    if (cart.length === 0) return;
+    setIsProcessingSale(true);
+
+    try {
+      await recordSale(
+        {
+          items: cart,
+          metodoPago: paymentMethod,
+          cliente: customerData.nombre.trim() || 'Cliente en tienda',
+        },
+        token
+      );
+
+      setSaleSuccessMessage(
+        `¡Venta registrada con éxito por ${formatPrice(totalPrice)}!`
+      );
+      clearCart();
+
+      setTimeout(() => {
+        setSaleSuccessMessage('');
+        setIsCartOpen(false);
+      }, 2500);
+    } catch (err) {
+      alert(`Error al registrar la venta: ${err.message}`);
+    } finally {
+      setIsProcessingSale(false);
+    }
+  };
+
+  const handleSendWhatsApp = async () => {
+    // Si hay sesión activa, registramos la venta para que compute en el panel de ganancias
+    if (token) {
+      try {
+        await recordSale(
+          {
+            items: cart,
+            metodoPago: 'WhatsApp / Delivery',
+            cliente: customerData.nombre.trim() || 'Cliente WhatsApp',
+          },
+          token
+        );
+      } catch (_) {}
+    }
+
     const url = generateWhatsAppUrl(STORE_PHONE_NUMBER, customerData);
     if (url) {
       window.open(url, '_blank', 'noopener,noreferrer');
     }
-  };
-
-  const formatPrice = (amount) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-    }).format(amount);
   };
 
   return (
@@ -65,11 +119,14 @@ export const CartDrawer = () => {
 
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
         <aside className="w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between">
+          
           {/* Cabecera del Drawer */}
           <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
             <div className="flex items-center space-x-2">
               <ShoppingBag className="w-5 h-5 text-emerald-600" />
-              <h2 className="text-lg font-bold text-slate-800">Tu Carrito ({totalItems})</h2>
+              <h2 className="text-lg font-bold text-slate-800">
+                Punto de Venta / Carrito ({totalItems})
+              </h2>
             </div>
             <button
               onClick={() => setIsCartOpen(false)}
@@ -80,6 +137,14 @@ export const CartDrawer = () => {
             </button>
           </div>
 
+          {/* Notificación de Venta Exitosa */}
+          {saleSuccessMessage && (
+            <div className="p-4 bg-emerald-600 text-white text-xs font-bold flex items-center space-x-2 animate-in slide-in-from-top">
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <span>{saleSuccessMessage}</span>
+            </div>
+          )}
+
           {/* Cuerpo: Lista de productos o Estado vacío */}
           <div className="flex-1 overflow-y-auto p-5 divide-y divide-slate-100">
             {cart.length === 0 ? (
@@ -87,15 +152,15 @@ export const CartDrawer = () => {
                 <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
                   <ShoppingBag className="w-8 h-8 stroke-[1.5]" />
                 </div>
-                <h3 className="text-base font-bold text-slate-700">Tu carrito está vacío</h3>
+                <h3 className="text-base font-bold text-slate-700">El carrito está vacío</h3>
                 <p className="text-xs text-slate-400 mt-1 max-w-xs">
-                  Agrega bebidas, snacks o golosinas para armar tu pedido express.
+                  Agrega productos del catálogo para procesar una venta o generar un pedido.
                 </p>
                 <button
                   onClick={() => setIsCartOpen(false)}
                   className="mt-6 inline-flex items-center space-x-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors"
                 >
-                  <span>Explorar productos</span>
+                  <span>Ver productos</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -110,7 +175,9 @@ export const CartDrawer = () => {
                     />
 
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-semibold text-slate-800 truncate">{item.nombre}</h4>
+                      <h4 className="text-sm font-semibold text-slate-800 truncate">
+                        {item.nombre}
+                      </h4>
                       <p className="text-xs font-bold text-emerald-600 mt-0.5">
                         {formatPrice(item.precio)} c/u
                       </p>
@@ -159,12 +226,34 @@ export const CartDrawer = () => {
                   </div>
                 ))}
 
-                {/* Formulario opcional de Entrega para WhatsApp */}
-                <div className="pt-4 border-t border-slate-200">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                    Datos para el Envío (Opcional)
-                  </h4>
-                  <div className="space-y-2">
+                {/* Formulario de Venta y Pago */}
+                <div className="pt-4 border-t border-slate-200 space-y-3">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                      Método de Pago
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {['Efectivo', 'Transferencia / QR', 'Tarjeta'].map((method) => (
+                        <button
+                          key={method}
+                          type="button"
+                          onClick={() => setPaymentMethod(method)}
+                          className={`p-2 rounded-xl text-[11px] font-bold border transition-all ${
+                            paymentMethod === method
+                              ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                              : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          {method}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                      Nombre del Cliente (Opcional)
+                    </label>
                     <div className="relative">
                       <User className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
                       <input
@@ -172,30 +261,8 @@ export const CartDrawer = () => {
                         name="nombre"
                         value={customerData.nombre}
                         onChange={handleInputChange}
-                        placeholder="Tu Nombre completo"
-                        className="w-full text-xs pl-8 pr-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                      />
-                    </div>
-                    <div className="relative">
-                      <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
-                      <input
-                        type="text"
-                        name="direccion"
-                        value={customerData.direccion}
-                        onChange={handleInputChange}
-                        placeholder="Calle, Número y Barrio"
-                        className="w-full text-xs pl-8 pr-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                      />
-                    </div>
-                    <div className="relative">
-                      <FileText className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
-                      <input
-                        type="text"
-                        name="notas"
-                        value={customerData.notas}
-                        onChange={handleInputChange}
-                        placeholder="Aclaraciones (ej: timbre 3B, pago con $10)"
-                        className="w-full text-xs pl-8 pr-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                        placeholder="ej. Juan Pérez"
+                        className="w-full text-xs pl-8 pr-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                   </div>
@@ -204,7 +271,7 @@ export const CartDrawer = () => {
             )}
           </div>
 
-          {/* Pie del Carrito: Totales y Botón de WhatsApp */}
+          {/* Pie del Carrito: Totales y Botones de Acción */}
           {cart.length > 0 && (
             <div className="p-5 border-t border-slate-200 bg-slate-50 space-y-3">
               <div className="flex items-center justify-between text-sm font-semibold text-slate-600">
@@ -213,17 +280,29 @@ export const CartDrawer = () => {
               </div>
 
               <div className="flex items-center justify-between text-base font-black text-slate-900 pt-2 border-t border-slate-200">
-                <span>Total estimado</span>
+                <span>Total a Cobrar</span>
                 <span className="text-xl text-emerald-600">{formatPrice(totalPrice)}</span>
               </div>
 
-              {/* Botón WhatsApp */}
+              {/* Botón Principal: Registrar y Cobrar Venta en Local */}
+              <button
+                onClick={handleProcessLocalSale}
+                disabled={isProcessingSale}
+                className="w-full py-3 px-4 rounded-xl font-bold text-sm text-white bg-slate-900 hover:bg-slate-800 active:scale-[0.99] shadow-lg shadow-slate-900/20 flex items-center justify-center space-x-2 transition-all disabled:opacity-50"
+              >
+                <CreditCard className="w-4 h-4 text-emerald-400" />
+                <span>
+                  {isProcessingSale ? 'Registrando Venta...' : 'Cobrar & Registrar Venta'}
+                </span>
+              </button>
+
+              {/* Botón Secundario: Enviar por WhatsApp */}
               <button
                 onClick={handleSendWhatsApp}
-                className="w-full py-3 px-4 rounded-xl font-bold text-sm text-white bg-green-600 hover:bg-green-700 active:scale-[0.99] shadow-lg shadow-green-600/25 flex items-center justify-center space-x-2 transition-all"
+                className="w-full py-2.5 px-4 rounded-xl font-bold text-xs text-white bg-green-600 hover:bg-green-700 active:scale-[0.99] shadow-sm flex items-center justify-center space-x-2 transition-all"
               >
-                <Send className="w-4 h-4" />
-                <span>Enviar Pedido por WhatsApp</span>
+                <Send className="w-3.5 h-3.5" />
+                <span>Enviar Pedido a WhatsApp</span>
               </button>
 
               {/* Botón Vaciar Carrito */}
@@ -231,7 +310,7 @@ export const CartDrawer = () => {
                 onClick={clearCart}
                 className="w-full text-center text-xs text-slate-400 hover:text-rose-600 font-medium py-1 transition-colors"
               >
-                Vaciar todo el carrito
+                Vaciar artículos
               </button>
             </div>
           )}

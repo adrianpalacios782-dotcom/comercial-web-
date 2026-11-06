@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { ENV } from '../config/env.js';
 
 /**
- * Middleware para proteger rutas que requieren permisos de administrador.
+ * Middleware para proteger rutas que requieren autenticación.
  * Verifica la existencia y validez del token JWT en la cabecera 'Authorization'.
  */
 export const requireAuth = (req, res, next) => {
@@ -35,4 +35,20 @@ export const requireAuth = (req, res, next) => {
       error: error.message
     });
   }
+};
+
+/**
+ * Middleware para autorizar según uno o más roles permitidos.
+ * Ejemplo de uso: requireRole(['admin']) o requireRole(['admin', 'cajero_1', 'cajero_2'])
+ */
+export const requireRole = (allowedRoles = []) => {
+  return (req, res, next) => {
+    if (!req.user || !allowedRoles.includes(req.user.rol)) {
+      return res.status(403).json({
+        success: false,
+        message: `Acceso denegado: Se requiere rol de (${allowedRoles.join(', ')}). Tu rol es: ${req.user?.rol || 'desconocido'}.`
+      });
+    }
+    next();
+  };
 };

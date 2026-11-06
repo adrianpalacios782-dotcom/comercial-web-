@@ -4,7 +4,7 @@ import React, { createContext, useContext, useReducer, useEffect } from 'react';
 const CART_STORAGE_KEY = 'tiendita_cart_v1';
 
 // Teléfono de WhatsApp por defecto de la tienda (código de país + número, sin signos + ni espacios)
-export const STORE_PHONE_NUMBER = '5491123456789';
+export const STORE_PHONE_NUMBER = '59172958516';
 
 // 1. Estado inicial: intentamos cargar del localStorage si existe información previa
 const getInitialState = () => {
