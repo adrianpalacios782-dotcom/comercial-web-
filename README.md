@@ -113,5 +113,8 @@ npm run dev
 cd frontend
 npm run dev
 ```
-
+Rol	Nombre	Usuario	Contraseña	Permisos Principales
+admin	Administrador Principal	admin	Admin2026! (o admin123)	Acceso total, gestión de productos y Panel Exclusivo de Ganancias
+cajero_1	Cajero Uno	cajero1	Cajero1@2026	Vender, agregar y quitar productos del inventario
+cajero_2	Cajero Dos	cajero2	Cajero2@2026	Vender, agregar y quitar productos del inventario
 Abre en tu navegador: [http://localhost:5173](http://localhost:5173)
