@@ -104,14 +104,14 @@ Cada producto cuenta con la siguiente estructura JSON validada:
 
 ### 1. Iniciar el Backend (Puerto 5000)
 ```bash
-cd backend
-npm run dev
+cd d:\comercial-web\backend
+npm.cmd run dev
 ```
 
 ### 2. Iniciar el Frontend (Puerto 5173)
 ```bash
-cd frontend
-npm run dev
+cd d:\comercial-web\frontend
+npm.cmd run dev
 ```
 Rol	Nombre	Usuario	Contraseña	Permisos Principales
 admin	Administrador Principal	admin	Admin2026! (o admin123)	Acceso total, gestión de productos y Panel Exclusivo de Ganancias
